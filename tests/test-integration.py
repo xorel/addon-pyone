@@ -41,6 +41,11 @@ class IntegrationTests(unittest.TestCase):
         m0 = marketpool.MARKETPLACE[0]
         self.assertEqual(m0.NAME, "OpenNebula Public")
 
+    def test_vm_pool(self):
+        vmpool = one.vmpool.info(-2,-1,-1,-1)
+        vm0 = vmpool.VM[0]
+        self.assertEqual(vm0.UNAME, "oneadmin")
+
     def test_invalid_method(self):
         with self.assertRaises(pyone.OneException):
             one.invalid.api.call()
