@@ -102,7 +102,7 @@ class OneServer(xmlrpc.client.ServerProxy):
 
         if sucess:
             ret = rawResponse[1]
-            if isinstance(ret, basestring):
+            if isinstance(ret, str):
                 # detect xml
                 if ret[0] == '<':
                     # PyXB won't recognize the type if the namespace is not present
