@@ -13,14 +13,14 @@ def dict2one(param):
     # if this is a structured type
     if isinstance(param, dict):
         if bool(param):
-            root = param.values()[0]
+            root = list(param.values())[0]
             if isinstance(root, dict):
                 # We return this dictionary as XML
                 return dicttoxml.dicttoxml(param, root=False, attr_type=False)
             else:
                 # We return this dictionary as attribute=value vector
                 ret = str()
-                for k, v in param.iteritems():
+                for (k, v) in param.items():
                     ret = ret + k + " = " + str('"') + str(v) + str('"') + str('\n')
                 return ret
         else:
