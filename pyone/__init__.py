@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from pyone import bindings
+from six import string_types
 import pyxb
 import xmlrpc.client
 import xml.dom.minidom as dom
@@ -102,12 +103,12 @@ class OneServer(xmlrpc.client.ServerProxy):
 
         if sucess:
             ret = rawResponse[1]
-            if isinstance(ret, str):
+            if isinstance(ret, string_types):
                 # detect xml
                 if ret[0] == '<':
                     # PyXB won't recognize the type if the namespace is not present
                     # preliminary parsing to do the checks and add it
-                    doc = dom.parseString(ret)
+                    doc = dom.parseString(u"{0}".format(ret).encode("utf-8"))
                     doc.documentElement.setAttribute('xmlns', 'http://opennebula.org/XMLSchema')
                     # toDOM and CD_DATA is broken in PyXB until 1.2.7, so, will force SAX parsing
                     return bindings.CreateFromDocument(doc.toxml())

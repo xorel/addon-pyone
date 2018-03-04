@@ -7,4 +7,4 @@ install:
   - make
   - python setup.py install
 # command to run tests
-script: cd tests && python -m unittest test-xml test-attribute-vector test-dictionary
+script: python -m unittest discover -v -s tests/ci/

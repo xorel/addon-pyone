@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # Copyright 2018 www.privaz.io Valletech AB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,3 +79,15 @@ class IntegrationTests(unittest.TestCase):
         tdict = one2dict(host.TEMPLATE)
         arch = tdict['TEMPLATE']['ARCH']
         self.assertEqual(arch, 'x86_64')
+
+    def test_international_characters_issue_006(self):
+        one.host.update(0,
+            {
+                'TEMPLATE': {
+                    'NOTES': 'Hostname is: ESPAÑA',
+                }
+            }, 1)
+        host = one.host.info(0)
+        tdict = one2dict(host.TEMPLATE)
+        # note python2 and python3 return different types: str or unicode
+        self.assertIn(tdict['TEMPLATE']['NOTES'], ["Hostname is: ESPAÑA",u"Hostname is: ESPAÑA"])
