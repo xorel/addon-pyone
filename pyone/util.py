@@ -16,7 +16,7 @@ def dict2one(param):
             root = list(param.values())[0]
             if isinstance(root, dict):
                 # We return this dictionary as XML
-                return dicttoxml.dicttoxml(param, root=False, attr_type=False)
+                return dicttoxml.dicttoxml(param, root=False, attr_type=False).decode('utf8')
             else:
                 # We return this dictionary as attribute=value vector
                 ret = str()
