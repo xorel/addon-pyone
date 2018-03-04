@@ -1,6 +1,9 @@
 PyONE: Open Nebula Python Bindings
 ==================================
 
+.. image:: https://travis-ci.org/OpenNebula/addon-pyone.svg?branch=master
+    :target: https://travis-ci.org/OpenNebula/addon-pyone
+
 Description
 -----------
 
