@@ -39,6 +39,7 @@ Compatibility
 Requirements
 ------------
 
+* Python 2.7 or 3.6
 * Connectivity and Credentials to OpenNebula XML-RPC Server.
 
 Installation
