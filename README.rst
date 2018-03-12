@@ -130,6 +130,8 @@ element and it will be translated to XML:
       }
     }, 1)
 
+PyXB creates members from most returned parameters, however, some elements in the XSD are marked as anyType
+and PyXB cannot generate members automatically, TEMPLATE and USER_TEMPLATE are the common ones.
 When reading structured parameters such as TEMPLATE you can use the utility function
 one2dict that will transform it as an easier to handle python dictionary
 
