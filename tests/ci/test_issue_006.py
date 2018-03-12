@@ -37,15 +37,24 @@ class TestIssue006(unittest.TestCase):
 
     def test_vm_01(self):
         vm = bindings.CreateFromDocument(self.read_xml_data('vm_01.xml'))
-        vm
         self.assertEqual(vm.ID, 595)
 
     def test_vm_02(self):
         vm = bindings.CreateFromDocument(self.read_xml_data('vm_02.xml'))
-        vm
         self.assertEqual(vm.ID, 454)
 
     def test_vm_03(self):
         vm = bindings.CreateFromDocument(self.read_xml_data('vm_03.xml'))
-        vm
         self.assertEqual(vm.ID, 596)
+
+    def test_vm_04(self):
+        vm = bindings.CreateFromDocument(self.read_xml_data('vm_04.xml'))
+        self.assertEqual(vm.ID, 4010)
+
+    def test_vnet_01(self):
+        vnet = bindings.CreateFromDocument(self.read_xml_data('vnet_01.xml'))
+        self.assertEqual(vnet.ID, 11)
+
+    def test_vnet_02(self):
+        vnet = bindings.CreateFromDocument(self.read_xml_data('vnet_02.xml'))
+        self.assertEqual(vnet.ID, 444)
