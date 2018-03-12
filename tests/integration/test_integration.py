@@ -91,3 +91,11 @@ class IntegrationTests(unittest.TestCase):
         tdict = one2dict(host.TEMPLATE)
         # note python2 and python3 return different types: str or unicode
         self.assertIn(tdict['TEMPLATE']['NOTES'], ["Hostname is: ESPAÑA",u"Hostname is: ESPAÑA"])
+
+    def test_vm_info(self):
+        vm = one.vm.info(0)
+        template = one2dict(vm.TEMPLATE)
+        utemplate = one2dict(vm.USER_TEMPLATE)
+        labels = utemplate['USER_TEMPLATE']['LABELS']
+        culsterId = template['TEMPLATE']['DISK']['CLUSTER_ID']
+        self.assertEqual(vm.ID,0)
