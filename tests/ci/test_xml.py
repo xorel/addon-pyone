@@ -1,3 +1,6 @@
+# coding: utf-8
+
+
 # Copyright 2018 www.privaz.io Valletech AB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,14 +29,13 @@ ns = 'http://opennebula.org/XMLSchema'
 
 class XmlTests(unittest.TestCase):
     def test_raw_instanciation(self):
-        marketpool = bindings.CreateFromDocument(xmlSample)
+        marketpool = bindings.parseString(xmlSample)
         m0 = marketpool.MARKETPLACE[0]
         self.assertEqual(m0.NAME, "OpenNebula Public")
 
-    def test_adding_namespace(self):
+    def test_raw_instanciation_without_namespace(self):
         doc = dom.parseString(nakedXmlSample)
-        doc.documentElement.setAttribute('xmlns', ns)
-        marketpool = bindings.CreateFromDocument(doc.toxml())
+        marketpool = bindings.parseString(doc.toxml())
         m0 = marketpool.MARKETPLACE[0]
         self.assertEqual(m0.NAME, "OpenNebula Public")
 

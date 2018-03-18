@@ -14,11 +14,8 @@
 
 from pyone import bindings
 from six import string_types
-import pyxb
 import xmlrpc.client
-import xml.dom.minidom as dom
 import socket
-import logging
 
 from .util import dict2one
 
@@ -41,15 +38,6 @@ class OneApiException(OneException):
 class OneInternalException(OneException):
     pass
 
-# Prevent warnings from PyXB about missing logger handler:
-# No handlers could be found for logger "pyxb.binding.basis"
-logging.getLogger("pyxb.binding.basis").addHandler(logging.NullHandler())
-
-#
-# Set the default namespace to make DOM easier to handle.
-#
-
-pyxb.utils.domutils.BindingDOMSupport.SetDefaultNamespace(bindings.Namespace)
 
 ##
 #
@@ -106,13 +94,8 @@ class OneServer(xmlrpc.client.ServerProxy):
             if isinstance(ret, string_types):
                 # detect xml
                 if ret[0] == '<':
-                    # PyXB won't recognize the type if the namespace is not present
-                    # preliminary parsing to do the checks and add it
-                    doc = dom.parseString(u"{0}".format(ret).encode("utf-8"))
-                    doc.documentElement.setAttribute('xmlns', 'http://opennebula.org/XMLSchema')
-                    # toDOM and CD_DATA is broken in PyXB until 1.2.7, so, will force SAX parsing
-                    return bindings.CreateFromDocument(doc.toxml())
-            return ret;
+                    return bindings.parseString(ret)
+            return ret
 
         else:
             message = rawResponse[1]

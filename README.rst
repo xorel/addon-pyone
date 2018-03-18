@@ -97,7 +97,7 @@ Note that the session parameter is automatically included as well as the "one." 
 
 **Returned Objects**
 
-The returned types have been generated with PyXB and closely match the XSD specification.
+The returned types have been generated with generateDS and closely match the XSD specification.
 You can use the XSD specification as primary documentation while your IDE will
 offer code completion as you code or debug.
 
@@ -130,23 +130,17 @@ element and it will be translated to XML:
       }
     }, 1)
 
-PyXB creates members from most returned parameters, however, some elements in the XSD are marked as anyType
-and PyXB cannot generate members automatically, TEMPLATE and USER_TEMPLATE are the common ones.
-When reading structured parameters such as TEMPLATE you can use the utility function
-one2dict that will transform it as an easier to handle python dictionary
+GenerateDS creates members from most returned parameters, however, some elements in the XSD are marked as anyType
+and GenerateDS cannot generate members automatically, TEMPLATE and USER_TEMPLATE are the common ones. Pyone will
+allow accessing its contents as a play python dictionary.
 
 .. code:: python
 
-  from pyone.util import one2dict
-
   host = one.host.info(0)
-  tdict = one2dict(host.TEMPLATE)
-  arch = tdict['TEMPLATE']['ARCH']
+  arch = host.TEMPLATE['ARCH']
 
 This makes it possible to read a TEMPLATE as dictionary, modify it and use it as parameter
 for an update method.
-
-It is also possible to use the method toDOM provided by PYxB and read the template as DOM. 
 
 **Building from Source**
 

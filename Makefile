@@ -14,16 +14,18 @@
 
 # Use full path to ensure virtualenv compatibility
 PYTHON = $(shell which python) 
-PYXBGEN = $(shell which pyxbgen) 
+GDS = $(shell which generateDS)
 
 schemas = index.xsd
 
 VPATH = src: pyone/xsd
 
-all: pyone/bindings/__init__.py
+all: pyone/bindings/__init__.py pyone/bindings/supbind.py
 
-pyone/bindings/__init__.py: $(schemas)
-	${PYTHON} ${PYXBGEN} -m pyone.bindings.__init__ -u $^
+pyone/bindings/__init__.py pyone/bindings/supbind.py: $(schemas)
+	${PYTHON} ${GDS} -q -f -o pyone/bindings/supbind.py -s pyone/bindings/__init__.py --super=supbind  $^
+	sed -i "s/import sys/import sys\nfrom pyone.util import TemplatedType/" pyone/bindings/__init__.py
+	sed -i "s/(supermod\./(TemplatedType, supermod\./g" pyone/bindings/__init__.py
 
 .PHONY: clean build
 clean:

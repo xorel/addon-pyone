@@ -26,7 +26,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='pyone',
-    version='1.0.7',
+    version='1.1.0',
     description='Python Bindings for OpenNebula XML-RPC API',
     long_description=long_description,
 
@@ -53,7 +53,7 @@ setup(
     keywords='cloud opennebula xmlrpc bindings',
     packages=find_packages(),
     install_requires=[
-        'PyXB',
+        'lxml',
         'dicttoxml',
         'xmltodict',
         'six',

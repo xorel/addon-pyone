@@ -1,5 +1,21 @@
+# Copyright 2018 www.privaz.io Valletech AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
 import dicttoxml
 import xmltodict
+from lxml.etree import tostring
 
 #
 # This function will cast parameters to make them nebula friendly
@@ -12,6 +28,10 @@ import xmltodict
 def dict2one(param):
     # if this is a structured type
     if isinstance(param, dict):
+        # in case we passed a dictionary that is part of another
+        if hasattr(param,'_root'):
+            param = param._root
+        # if the dictionary is not empty
         if bool(param):
             root = list(param.values())[0]
             if isinstance(root, dict):
@@ -31,11 +51,50 @@ def dict2one(param):
 #
 # This function returns a dictionary from a binding
 # The dictionary can then be used
+# Deprecated
+
+def one2dict(element):
+    # provide backwards compatibility for TEMPLATE and USER_TEMPLATE only
+    return element._root
+
+#
+# Utility Function to intgerate
 #
 
+def child2dict(element):
+    # Create a dictionary for the documentTree
+    xml = tostring(element)
+    ret = xmltodict.parse(xml)
 
-def one2dict(param):
-    dom = param.toDOM()
-    ret = xmltodict.parse(dom.toxml())
-    del ret[dom.documentElement.tagName]['@xmlns']
-    return ret
+    # get the tag name and remove the ns attribute if present
+    if "}" in element.tag:
+        tagName = element.tag.split('}')[1]
+        del ret[tagName]['@xmlns']
+    else:
+        tagName = element.tag
+
+    # return the contents dictionary, but save a reference
+    ret[tagName]._root = ret
+    return ret[tagName]
+
+#
+# initializes the TEMPLATE elements in bindings
+#
+
+def build_template_node(obj,nodeName,child):
+    if nodeName == "TEMPLATE":
+        obj.TEMPLATE = child2dict(child)
+        return True
+    elif nodeName == "USER_TEMPLATE":
+        obj.USER_TEMPLATE = child2dict(child)
+        return True
+    else:
+        return False
+
+#
+# Mixings for bindings subclass
+#
+class TemplatedType(object):
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if not build_template_node(self, nodeName_, child_):
+            super(TemplatedType, self).buildChildren(child_,node,nodeName_,fromsubclass_)

@@ -18,6 +18,7 @@ import unittest
 import ssl
 import pyone
 
+# Deprecated utility, testing backward compatibility
 from pyone.util import one2dict
 
 testSession = "oneadmin:onepass"
@@ -68,16 +69,22 @@ class IntegrationTests(unittest.TestCase):
         with self.assertRaises(Exception):
             one.host.update(0, {}, 1)
 
-    def test_retrieve_template_as_DOM(self):
-        host = one.host.info(0)
-        template = host.TEMPLATE.toDOM()
-        arch = template.getElementsByTagName('ARCH')[0].firstChild.nodeValue
-        self.assertEqual(arch, 'x86_64')
+    def test_retrieve_template_as_DOM_no_longer_working(self):
+        with self.assertRaises(AttributeError):
+            host = one.host.info(0)
+            template = host.TEMPLATE.toDOM()
+            arch = template.getElementsByTagName('ARCH')[0].firstChild.nodeValue
+            self.assertEqual(arch, 'x86_64')
 
-    def test_retrieve_template_as_dict(self):
+    def test_retrieve_template_as_deprecated_dict(self):
         host = one.host.info(0)
         tdict = one2dict(host.TEMPLATE)
         arch = tdict['TEMPLATE']['ARCH']
+        self.assertEqual(arch, 'x86_64')
+
+    def test_retrieve_template_as_new_dict(self):
+        host = one.host.info(0)
+        arch = host.TEMPLATE['ARCH']
         self.assertEqual(arch, 'x86_64')
 
     def test_international_characters_issue_006(self):
@@ -88,14 +95,18 @@ class IntegrationTests(unittest.TestCase):
                 }
             }, 1)
         host = one.host.info(0)
-        tdict = one2dict(host.TEMPLATE)
-        # note python2 and python3 return different types: str or unicode
-        self.assertIn(tdict['TEMPLATE']['NOTES'], ["Hostname is: ESPAÑA",u"Hostname is: ESPAÑA"])
+        self.assertIn(host.TEMPLATE['NOTES'], [u"Hostname is: ESPAÑA"])
+
+    def test_modify_template(self):
+        host = one.host.info(0)
+        host.TEMPLATE["NOTES"]="Hostname is: España"
+        one.host.update(0,host.TEMPLATE,1)
+        host2 = one.host.info(0)
+        self.assertIn(host2.TEMPLATE['NOTES'], [u"Hostname is: España"])
+
 
     def test_vm_info(self):
         vm = one.vm.info(0)
-        template = one2dict(vm.TEMPLATE)
-        utemplate = one2dict(vm.USER_TEMPLATE)
-        labels = utemplate['USER_TEMPLATE']['LABELS']
-        culsterId = template['TEMPLATE']['DISK']['CLUSTER_ID']
+        labels = vm.USER_TEMPLATE['LABELS']
+        culsterId = vm.TEMPLATE['DISK']['CLUSTER_ID']
         self.assertEqual(vm.ID,0)
