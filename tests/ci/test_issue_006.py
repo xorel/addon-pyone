@@ -55,3 +55,7 @@ class TestIssue006(unittest.TestCase):
     def test_vnet_02(self):
         vnet = bindings.parseString(self.read_xml_data('vnet_02.xml'))
         self.assertEqual(vnet.ID, 444)
+
+    def test_vm_pool_01(self):
+        vmp = bindings.parseString(self.read_xml_data('vm_pool_01.xml'))
+        self.assertEqual(vmp.VM[0].ID, 1)

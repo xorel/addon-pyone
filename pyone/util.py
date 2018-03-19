@@ -16,6 +16,7 @@
 import dicttoxml
 import xmltodict
 from lxml.etree import tostring
+from collections import OrderedDict
 
 #
 # This function will cast parameters to make them nebula friendly
@@ -72,6 +73,10 @@ def child2dict(element):
         del ret[tagName]['@xmlns']
     else:
         tagName = element.tag
+
+    # Reemplace no-dictionary with empty dictionary
+    if ret[tagName] == None:
+        ret[tagName] = OrderedDict()
 
     # return the contents dictionary, but save a reference
     ret[tagName]._root = ret
