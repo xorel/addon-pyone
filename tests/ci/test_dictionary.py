@@ -16,7 +16,7 @@ import unittest
 import pyone
 import xmltodict
 
-xmlSample = '''<MARKETPLACE_POOL xmlns="http://opennebula.org/XMLSchema">
+xmlSample = b'''<MARKETPLACE_POOL xmlns="http://opennebula.org/XMLSchema">
     <MARKETPLACE>
         <ID>0</ID>
         <UID>0</UID>
@@ -74,7 +74,7 @@ xmlSample = '''<MARKETPLACE_POOL xmlns="http://opennebula.org/XMLSchema">
     </MARKETPLACE>
 </MARKETPLACE_POOL>'''
 
-xmlSample2 = '''<MARKETPLACE_POOL>
+xmlSample2 = b'''<MARKETPLACE_POOL>
     <MARKETPLACE>
         <ID>0</ID>
         <UID>0</UID>
