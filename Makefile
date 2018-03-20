@@ -24,7 +24,7 @@ all: pyone/bindings/__init__.py pyone/bindings/supbind.py
 
 pyone/bindings/__init__.py pyone/bindings/supbind.py: $(schemas)
 	mkdir -p pyone/bindings
-	${PYTHON} ${GDS} -q -f -o pyone/bindings/supbind.py -s pyone/bindings/__init__.py --super=supbind --external-encoding=utf-8 $^
+	${PYTHON} ${GDS} -q -f -o pyone/bindings/supbind.py -s pyone/bindings/__init__.py --super=supbind --external-encoding=utf-8 --silence $^
 	sed -i "s/import sys/import sys\nfrom pyone.util import TemplatedType/" pyone/bindings/__init__.py
 	sed -i "s/(supermod\./(TemplatedType, supermod\./g" pyone/bindings/__init__.py
 
