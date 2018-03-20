@@ -17,13 +17,22 @@
 import unittest
 import ssl
 import pyone
+import os
 
 # Deprecated utility, testing backward compatibility
 from pyone.util import one2dict
 
-testSession = "oneadmin:onepass"
-testEndpoint = 'https://192.168.121.55/RPC2'
-one = pyone.OneServer(testEndpoint, session=testSession, context=ssl._create_unverified_context())
+# Capture OpenNebula Session parameters from environment or hardcoded...
+testSession = os.getenv("PYONE_SESSION","oneadmin:onepass")
+testEndpoint = os.getenv("PYONE_ENDPOINT", 'https://192.168.121.55/RPC2')
+
+# Disable SSL checks for TEST environment only, and deal with Centos, see issue #13
+if "PYTHONHTTPSVERIFY" in os.environ:
+    testContext = None
+else:
+    testContext = ssl._create_unverified_context()
+
+one = pyone.OneServer(testEndpoint, session=testSession, context= testContext)
 
 class IntegrationTests(unittest.TestCase):
 
