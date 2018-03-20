@@ -28,6 +28,8 @@ Please note that by contributing to this project you accept that your contributi
 are under the Apache License 2.0, just like the rest of this project. Please take
 some time to read and understand the license terms and ensure that you are happy with it.
 
+If you have access to a large OpenNebula deployment, contribute by testing on it.
+
 Authors
 -------
 
@@ -36,7 +38,7 @@ Authors
 Compatibility
 -------------
 
-* PyONE is compatible with OpenNebula v5.4
+* PyONE is compatible with OpenNebula v5.4.x
 * It should be easy to backport PyOne to any OpenNebula version with XML-RPC API that includes XML Schema Definition (XSD) files.
 
 Requirements
@@ -52,7 +54,7 @@ PyONE is distributed as a python package, it can be installed as:
 
 .. code:: shell
 
-  pip install pyone
+  $ pip install pyone
 
 Configuration
 -------------
@@ -132,7 +134,7 @@ element and it will be translated to XML:
 
 GenerateDS creates members from most returned parameters, however, some elements in the XSD are marked as anyType
 and GenerateDS cannot generate members automatically, TEMPLATE and USER_TEMPLATE are the common ones. Pyone will
-allow accessing its contents as a play python dictionary.
+allow accessing its contents as a plain python dictionary.
 
 .. code:: python
 
@@ -140,11 +142,35 @@ allow accessing its contents as a play python dictionary.
   arch = host.TEMPLATE['ARCH']
 
 This makes it possible to read a TEMPLATE as dictionary, modify it and use it as parameter
-for an update method.
+for an update method, as following:
+
+.. code:: python
+
+  host = one.host.info(0)
+  host.TEMPLATE['NOTES']="Just updated"
+  one.host.update(0,host.TEMPLATE,1)
+
 
 **Building from Source**
 
 Note that a Makefile is provided to generate the python bindings
+
+**Runing Tests**
+
+There are two main sets of tests.
+
+- CI Tests: meant for continious integration, do not require an OpenNebula platform, run mainly on XML samples, etc.
+- Integration Tests: meant to be used with a TESTING OpenNebula platform. Will create and modify OpenNebula objects.
+
+You can run the tests as follows:
+
+.. code:: sh
+
+  $ export PYONE_SESSION="oneadmin:onepass"
+  $ export PYONE_ENDPOINT="https://192.168.121.55/RPC2"
+  $ python -m unittest discover -v -s tests/ci/
+  $ python -m unittest discover -v -s tests/integration
+
 
 References
 ----------
