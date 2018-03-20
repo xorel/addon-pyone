@@ -94,7 +94,7 @@ class OneServer(xmlrpc.client.ServerProxy):
             if isinstance(ret, string_types):
                 # detect xml
                 if ret[0] == '<':
-                    return bindings.parseString(ret)
+                    return bindings.parseString(ret.encode("utf-8"))
             return ret
 
         else:
