@@ -171,6 +171,13 @@ You can run the tests as follows:
   $ python -m unittest discover -v -s tests/ci/
   $ python -m unittest discover -v -s tests/integration
 
+Known Issues
+------------
+
+In some instances OpenNebula generates non-conformant XML elements, elements that according to the XSD should not
+be there. GenerateDS will silently ignore them and they will not be accessible.
+
+Those cases should be reported to OpenNebula for the XSDs to be completed. 
 
 References
 ----------
