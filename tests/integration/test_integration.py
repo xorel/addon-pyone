@@ -28,11 +28,9 @@ testEndpoint = os.getenv("PYONE_ENDPOINT", 'https://192.168.121.55/RPC2')
 
 # Disable SSL checks for TEST environment only, and deal with Centos, see issue #13
 if "PYTHONHTTPSVERIFY" in os.environ:
-    testContext = None
+    one = pyone.OneServer(testEndpoint, session=testSession)
 else:
-    testContext = ssl._create_unverified_context()
-
-one = pyone.OneServer(testEndpoint, session=testSession, context= testContext)
+    one = pyone.OneServer(testEndpoint, session=testSession, context=ssl._create_unverified_context())
 
 class IntegrationTests(unittest.TestCase):
 
@@ -44,7 +42,11 @@ class IntegrationTests(unittest.TestCase):
 
     def test_auth_error(self):
         with self.assertRaises(pyone.OneAuthenticationException):
-            xone = pyone.OneServer(testEndpoint, session="oneadmin:invalidpass", context=ssl._create_unverified_context())
+            # Disable SSL checks for TEST environment only, and deal with Centos, see issue #13
+            if "PYTHONHTTPSVERIFY" in os.environ:
+                xone = pyone.OneServer(testEndpoint, session="oneadmin:invalidpass")
+            else:
+                xone = pyone.OneServer(testEndpoint, session="oneadmin:invalidpass", context=ssl._create_unverified_context())
             xone.hostpool.info()
 
     def test_market_info(self):
