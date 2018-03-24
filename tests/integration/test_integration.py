@@ -118,6 +118,6 @@ class IntegrationTests(unittest.TestCase):
 
     def test_vm_info(self):
         vm = one.vm.info(0)
-        labels = vm.USER_TEMPLATE['LABELS']
+        labels = vm.USER_TEMPLATE.get('LABELS', "")
         culsterId = vm.TEMPLATE['DISK']['CLUSTER_ID']
         self.assertEqual(vm.ID,0)
