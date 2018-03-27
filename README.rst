@@ -77,7 +77,7 @@ certificate verification as:
 
 It is also possible to modify the default connection timeout, but note that the setting
 will modify the TCP socket default timeout of your Python VM, ensure that the chosen timeout
-is suitable to any other connections runing in your project.
+is suitable to any other connections running in your project.
 
 Usage
 -----
@@ -187,8 +187,7 @@ PyONE started as part of the `Privazio <http://privaz.io>`_ project.
 Privazio is a private cloud for residential users,
 startups or workgroups with a special focus on privacy.
 
-PyONE is meant to be a key component to implement an Ansible module for
-managing Open Nebula.
+PyONE is the core component of the following `Ansible module for OpenNebula <https://github.com/privazio/ansible>`_.
 
 License
 -------
