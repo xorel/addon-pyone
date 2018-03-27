@@ -121,3 +121,12 @@ class IntegrationTests(unittest.TestCase):
         labels = vm.USER_TEMPLATE.get('LABELS', "")
         culsterId = vm.TEMPLATE['DISK']['CLUSTER_ID']
         self.assertEqual(vm.ID,0)
+
+
+    def test_market_info(self):
+        markets = one.marketpool.info()
+        self.assertEqual(markets.MARKETPLACE[0].NAME, "OpenNebula Public")
+
+    def test_maketplace_app_info(self):
+        maketplace_apps= one.marketapppool.info(-2,-1,-1)
+        self.assertEqual(maketplace_apps.MARKETPLACEAPP[0].GNAME,'oneadmin')
