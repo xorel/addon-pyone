@@ -18,15 +18,19 @@ import xmltodict
 from lxml.etree import tostring
 from collections import OrderedDict
 
-#
-# This function will cast parameters to make them nebula friendly
-# flat dictionaries will be turned into attribute=value vectors
-# dictionaries with root dictionary will be serialized as XML
-#
-# Structures will be turned into strings before being submitted.
-
 
 def dict2one(param):
+
+    '''
+    This function will cast parameters to make them nebula friendly
+    flat dictionaries will be turned into attribute=value vectors
+    dictionaries with root dictionary will be serialized as XML
+    Structures will be turned into strings before being submitted.
+
+    :param param: the parameter to make nebula friendly
+    :return: casted parameter
+    '''
+
     # if this is a structured type
     if isinstance(param, dict):
         # in case we passed a dictionary that is part of another
@@ -49,21 +53,27 @@ def dict2one(param):
     else:
         return param
 
-#
-# This function returns a dictionary from a binding
-# The dictionary can then be used
-# Deprecated
 
 def one2dict(element):
-    # provide backwards compatibility for TEMPLATE and USER_TEMPLATE only
+    '''
+    This function returns a dictionary from an anyType binding element
+    The dictionary can then be used later as imput for an udpate
+    This is now deprecated, included for backward compatibility.
+
+    :param element: anyType element to be converted such as TEMLATE or USER_TEMPLATE
+    :return: a dictionary representing the element
+    '''
+
     return element._root
 
-#
-# Utility Function to intgerate
-#
 
 def child2dict(element):
-    # Create a dictionary for the documentTree
+    '''
+    Creates a dictionary from the documentTree obtained from a binding Element.
+    :param element:
+    :return:
+    '''
+
     xml = tostring(element)
     ret = xmltodict.parse(xml)
 
@@ -82,11 +92,15 @@ def child2dict(element):
     ret[tagName]._root = ret
     return ret[tagName]
 
-#
-# initializes the TEMPLATE elements in bindings
-#
 
 def build_template_node(obj,nodeName,child):
+    '''
+    Utility function to build an anyType element that can be accessed as a dictionary
+    :param obj:
+    :param nodeName:
+    :param child:
+    :return:
+    '''
     if nodeName == "TEMPLATE":
         obj.TEMPLATE = child2dict(child)
         return True
@@ -96,10 +110,11 @@ def build_template_node(obj,nodeName,child):
     else:
         return False
 
-#
-# Mixings for bindings subclass
-#
+
 class TemplatedType(object):
+    '''
+    Mixin class for Templated bindings
+    '''
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if not build_template_node(self, nodeName_, child_):
             super(TemplatedType, self).buildChildren(child_,node,nodeName_,fromsubclass_)
