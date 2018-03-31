@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from . import OneException
-from . import MARKETAPP_STATE
+from . import MARKETPLACEAPP_STATES
 
 class OneHelperException(OneException):
     pass
@@ -56,7 +56,7 @@ def marketapp_export(one, appid, dsid=None, name=None, vmtemplate_name=None):
 
     app = one.marketapp.info(appid)
 
-    if app.STATE != MARKETAPP_STATE.READY:
+    if app.STATE != MARKETPLACEAPP_STATES.READY:
         raise OneHelperException("Application is not in READY state")
 #
 #    if app.TYPE

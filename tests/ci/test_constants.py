@@ -17,8 +17,15 @@
 # this tests help stablishing if they are working in previous versions too.
 
 from unittest import TestCase
-from pyone import MARKETAPP_STATE
+from pyone import MARKETPLACEAPP_STATES, LCM_STATE
 
 class ConstantTest(TestCase):
     def test_int_constants(self):
-        self.assertEqual(MARKETAPP_STATE.READY,1)
+        self.assertEqual(MARKETPLACEAPP_STATES.READY,1)
+        self.assertEqual(LCM_STATE.RUNNING,3)
+
+    def test_state_as_string(self):
+        self.assertEqual(str(MARKETPLACEAPP_STATES.READY.name),'READY')
+
+    def test_int_to_state(self):
+        self.assertEqual(MARKETPLACEAPP_STATES(3).name,'ERROR')
