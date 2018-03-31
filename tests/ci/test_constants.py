@@ -29,3 +29,6 @@ class ConstantTest(TestCase):
 
     def test_int_to_state(self):
         self.assertEqual(MARKETPLACEAPP_STATES(3).name,'ERROR')
+
+    def test_state_interpolation(self):
+        self.assertEqual( 'state is %s' % MARKETPLACEAPP_STATES(3).name,'state is ERROR')
