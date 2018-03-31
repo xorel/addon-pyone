@@ -38,13 +38,26 @@ class OneApiException(OneException):
 class OneInternalException(OneException):
     pass
 
+#
+# Constants
+#
 
-##
+from enum import IntEnum
+
+MARKETAPP_STATE = IntEnum('MARKETAPP_STATE', "INIT READY LOCKED ERROR DISABLED", start=0)
+
+
 #
-# XML-RPC OpenNebula Server
-# Slightly tuned ServerProxy
+# Import helper methods after definitions they are likely to refer to.
 #
+
+from .helpers import marketapp_export
+
 class OneServer(xmlrpc.client.ServerProxy):
+    '''
+    XML-RPC OpenNebula Server
+    Slightly tuned ServerProxy
+    '''
 
     #
     # Override the constructor to take the authentication or session
@@ -56,6 +69,10 @@ class OneServer(xmlrpc.client.ServerProxy):
         if timeout:
             # note that this will affect other classes using sockets too.
             socket.setdefaulttimeout(timeout)
+        # register helpers:
+        self.__helpers = {
+            "marketapp.export": marketapp_export
+        }
         xmlrpc.client.ServerProxy.__init__(self, uri, **options)
 
     #
@@ -72,14 +89,19 @@ class OneServer(xmlrpc.client.ServerProxy):
             lparams[i] = dict2one(param)
         params = tuple(lparams)
 
-        params = ( self.__session, ) + params
-        methodname = "one." + methodname
-        try:
-            ret = xmlrpc.client.ServerProxy._ServerProxy__request(self, methodname, params)
-        except xmlrpc.client.Fault as e:
-            raise OneException(e)
+        # check if this is a helper or a XMLPRC method call
+        if methodname in self.__helpers:
+            return self.__helpers[methodname](self, *params)
+        else:
+            # and session a prefix
+            params = ( self.__session, ) + params
+            methodname = "one." + methodname
+            try:
+                ret = xmlrpc.client.ServerProxy._ServerProxy__request(self, methodname, params)
+            except xmlrpc.client.Fault as e:
+                raise OneException(e)
 
-        return self.__response(ret)
+            return self.__response(ret)
 
     #
     # Process the response from one XML-RPC server
@@ -113,5 +135,8 @@ class OneServer(xmlrpc.client.ServerProxy):
                 raise OneInternalException(message)
             else:
                 raise OneException(message)
+
+    #def marketapp.export(self):
+
 
 
