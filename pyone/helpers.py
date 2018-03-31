@@ -13,7 +13,8 @@
 # limitations under the License.
 
 from . import OneException
-from . import MARKETPLACEAPP_STATES
+from . import MARKETPLACEAPP_STATES, MARKETPLACEAPP_TYPES
+from base64 import b64decode
 
 class OneHelperException(OneException):
     pass
@@ -31,7 +32,7 @@ def marketapp_export(one, appid, dsid=None, name=None, vmtemplate_name=None):
     :param one: the XMLRPC server
     :param appid: id of the marketplace app
     :param dsid: id of the datastore to save images, if not provided the datastore named "default" will be used.
-    :param name: name of the new object, if not provided I will make up one for you
+    :param name: name of the new object, if not provided the same name as the App will be used
     :param vmtemplate_name: name for the VM Template, if the app has one.
     :return: a dictionary with the ID of the new Image as image and the ID of the new associated template as vmtemplate. If no template has been defined, it will return -1.
     '''
@@ -58,7 +59,30 @@ def marketapp_export(one, appid, dsid=None, name=None, vmtemplate_name=None):
 
     if app.STATE != MARKETPLACEAPP_STATES.READY:
         raise OneHelperException("Application is not in READY state")
-#
-#    if app.TYPE
+
+    if app.TYPE == MARKETPLACEAPP_TYPES.IMAGE:
+        if app.APPTEMPLATE64:
+            templ=b64decode(app.APPTEMPLATE64)
+        else:
+            templ=""
+
+        if not name:
+            name = app.NAME
+
+        templ+='''\nNAME="%s"\nFROM_APP="%d"''' % (name,app.ID)
+
+        ret['image'] = one.image.allocate(templ,dsid)
+
+        if 'VMTEMPLATE64' in app.TEMPLATE:
+            vmtempl = b64decode(app.TEMPLATE['VMTEMPLATE64'])
+            if not vmtemplate_name:
+                vmtemplate_name = app.NAME
+
+            vmtempl += '''\nNAME="%s"\nDISK=[ IMAGE_ID = %d ]''' % (vmtemplate_name, ret['image'])
+
+            ret['vmtemplate'] = one.template.allocate(vmtempl)
+
+    else:
+        raise OneHelperException('App type %s not supported' % MARKETPLACEAPP_TYPES(app.TYPE).name)
 
     return ret
