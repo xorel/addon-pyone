@@ -17,18 +17,24 @@
 # this tests help stablishing if they are working in previous versions too.
 
 from unittest import TestCase
+from enum import IntEnum
 from pyone import MARKETPLACEAPP_STATES, LCM_STATE
 
 class ConstantTest(TestCase):
     def test_int_constants(self):
         self.assertEqual(MARKETPLACEAPP_STATES.READY,1)
-        self.assertEqual(LCM_STATE.RUNNING,3)
+        self.assertEqual(LCM_STATE.RUNNING, 3)
 
     def test_state_as_string(self):
-        self.assertEqual(str(MARKETPLACEAPP_STATES.READY.name),'READY')
+        self.assertEqual(str(MARKETPLACEAPP_STATES.READY.name), 'READY')
 
     def test_int_to_state(self):
-        self.assertEqual(MARKETPLACEAPP_STATES(3).name,'ERROR')
+        self.assertEqual(MARKETPLACEAPP_STATES(3).name, 'ERROR')
 
     def test_state_interpolation(self):
-        self.assertEqual( 'state is %s' % MARKETPLACEAPP_STATES(3).name,'state is ERROR')
+        self.assertEqual( 'state is %s' % MARKETPLACEAPP_STATES(3).name, 'state is ERROR')
+
+    def test_detect_and_cast_constant(self):
+        c = MARKETPLACEAPP_STATES.READY
+        self.assertTrue(isinstance(c, IntEnum))
+        self.assertEqual(c.value, 1)
