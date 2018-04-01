@@ -106,15 +106,15 @@ class DictionaryTests(unittest.TestCase):
                     'MAX_CPU': '176'
                 }
             }
-        self.assertIn(pyone.util.dict2one(templ), ["<TEMPLATE><MAX_CPU>176</MAX_CPU><LABELS>SSD</LABELS></TEMPLATE>","<TEMPLATE><LABELS>SSD</LABELS><MAX_CPU>176</MAX_CPU></TEMPLATE>"])
+        self.assertIn(pyone.util.cast2one(templ), ["<TEMPLATE><MAX_CPU>176</MAX_CPU><LABELS>SSD</LABELS></TEMPLATE>", "<TEMPLATE><LABELS>SSD</LABELS><MAX_CPU>176</MAX_CPU></TEMPLATE>"])
 
     def test_xml_to_dict(self):
         marketplace = pyone.bindings.parseString(xmlSample)
         template = pyone.util.one2dict(marketplace.MARKETPLACE[0].TEMPLATE)
-        xml=pyone.util.dict2one(template)
+        xml=pyone.util.cast2one(template)
         self.assertEqual(xml,u'<TEMPLATE><DESCRIPTION>OpenNebula Systems MarketPlace</DESCRIPTION><MARKET_MAD>one</MARKET_MAD></TEMPLATE>')
         # new direct method
-        xml2 = pyone.util.dict2one(marketplace.MARKETPLACE[0].TEMPLATE)
+        xml2 = pyone.util.cast2one(marketplace.MARKETPLACE[0].TEMPLATE)
         self.assertEqual(xml,xml2)
 
     def test_xml_to_dict_easy_access(self):
