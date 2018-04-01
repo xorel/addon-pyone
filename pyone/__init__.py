@@ -17,7 +17,7 @@ from six import string_types
 import xmlrpc.client
 import socket
 
-from .util import dict2one
+from .util import cast2one
 
 #
 # Exceptions as defined in the XML-API reference
@@ -172,8 +172,8 @@ class OneServer(xmlrpc.client.ServerProxy):
 
         # cast parameters, make them one-friendly
         lparams = list(params)
-        for i,param in enumerate(lparams):
-            lparams[i] = dict2one(param)
+        for i, param in enumerate(lparams):
+            lparams[i] = cast2one(param)
         params = tuple(lparams)
 
         # check if this is a helper or a XMLPRC method call

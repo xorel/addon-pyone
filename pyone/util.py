@@ -17,9 +17,10 @@ import dicttoxml
 import xmltodict
 from lxml.etree import tostring
 from collections import OrderedDict
+from enum import IntEnum
 
 
-def dict2one(param):
+def cast2one(param):
 
     '''
     This function will cast parameters to make them nebula friendly
@@ -31,10 +32,13 @@ def dict2one(param):
     :return: casted parameter
     '''
 
-    # if this is a structured type
+    if isinstance(param, IntEnum):
+        # if the param is a constant we return its value
+        return param.value
     if isinstance(param, dict):
+        # if this is a structured type
         # in case we passed a dictionary that is part of another
-        if hasattr(param,'_root'):
+        if hasattr(param, '_root'):
             param = param._root
         # if the dictionary is not empty
         if bool(param):
