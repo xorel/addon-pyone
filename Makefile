@@ -34,5 +34,5 @@ clean:
 	rm -f pyone/bindings/*.py
 	rm -rf build dist
 
-dist:
+dist: clean all
 	${PYTHON} setup.py sdist bdist_wheel
