@@ -26,7 +26,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='pyone',
-    version='1.1.1',
+    version='1.1.2',
     description='Python Bindings for OpenNebula XML-RPC API',
     long_description=long_description,
 
