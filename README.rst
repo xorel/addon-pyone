@@ -150,6 +150,16 @@ for an update method, as following:
   host.TEMPLATE['NOTES']="Just updated"
   one.host.update(0,host.TEMPLATE,1)
 
+**Constants**
+
+Some methods will return encoded values such as those representing the STATE of a resource. Constant are
+provided to better handle those.
+
+.. code:: python
+
+  from pyone import MARKETPLACEAPP_STATES
+  if app.STATE == MARKETPLACEAPP_STATES.READY:
+    # action that assumes app ready
 
 **Building from Source**
 
