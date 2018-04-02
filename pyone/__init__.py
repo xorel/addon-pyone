@@ -141,17 +141,21 @@ VM_STATE = IntEnum('VM_STATE','INIT PENDING HOLD ACTIVE STOPPED SUSPENDED DONE F
 from .helpers import marketapp_export
 
 class OneServer(xmlrpc.client.ServerProxy):
-    '''
+    """
     XML-RPC OpenNebula Server
     Slightly tuned ServerProxy
-    '''
-
-    #
-    # Override the constructor to take the authentication or session
-    # Will also configure the socket timeout
-    #
+    """
 
     def __init__(self, uri, session, timeout=None, **options):
+        """
+        Override the constructor to take the authentication or session
+        Will also configure the socket timeout
+        :param uri: OpenNebula endpoint
+        :param session: OpenNebula authentication session
+        :param timeout: Socket timetout
+        :param options: additional options for ServerProxy
+        """
+
         self.__session = session
         if timeout:
             # note that this will affect other classes using sockets too.
@@ -163,32 +167,47 @@ class OneServer(xmlrpc.client.ServerProxy):
         xmlrpc.client.ServerProxy.__init__(self, uri, **options)
 
     #
-    # Override/patch the (private) request method to:
-    # - structured parameters will be casted to attribute=value or XML
-    # - automatically prefix all methodnames with "one."
-    # - automatically add the authentication info as first parameter
-    # - process the response
     def _ServerProxy__request(self, methodname, params):
+        """
+        Override/patch the (private) request method to:
+          - structured parameters will be casted to attribute=value or XML
+          - automatically prefix all methodnames with "one."
+          - automatically add the authentication info as first parameter
+          - process the response
 
-        # cast parameters, make them one-friendly
-        lparams = list(params)
-        for i, param in enumerate(lparams):
-            lparams[i] = cast2one(param)
-        params = tuple(lparams)
+        :param methodname: XMLRPC method name
+        :param params: XMLRPC parameters
+        :return: opennebula object or XMLRPC returned value
+        """
 
         # check if this is a helper or a XMLPRC method call
+
         if methodname in self.__helpers:
             return self.__helpers[methodname](self, *params)
         else:
-            # and session a prefix
-            params = ( self.__session, ) + params
-            methodname = "one." + methodname
-            try:
-                ret = xmlrpc.client.ServerProxy._ServerProxy__request(self, methodname, params)
-            except xmlrpc.client.Fault as e:
-                raise OneException(e)
-
+            ret = self._do_request("one."+methodname,self._cast_parms(params))
             return self.__response(ret)
+
+    def _do_request(self, method, params):
+        try:
+            return xmlrpc.client.ServerProxy._ServerProxy__request(self, method, params)
+        except xmlrpc.client.Fault as e:
+            raise OneException(str(e))
+
+    def _cast_parms(self,params):
+        """
+        cast parameters, make them one-friendly
+        :param params:
+        :return:
+        """
+        lparams = list(params)
+        for i, param in enumerate(lparams):
+            lparams[i] = cast2one(param)
+        params= tuple(lparams)
+        # and session a prefix
+        params = (self.__session,) + params
+        return params
+
 
     #
     # Process the response from one XML-RPC server
