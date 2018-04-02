@@ -15,7 +15,7 @@
 from hashlib import md5
 from json import dump, load, dumps as json_dumps
 from base64 import b64decode, b64encode
-from pickle import dumps, loads, HIGHEST_PROTOCOL
+from pickle import dumps, loads
 from os import path, makedirs
 from . import OneServer
 from tblib import pickling_support
@@ -115,7 +115,7 @@ class OneServerTester(OneServer):
                 ret = OneServer._do_request(self, method, params)
             except Exception as exception:
                 ret = {
-                    "exception": b64encode(dumps(exc_info(), HIGHEST_PROTOCOL)).decode(),
+                    "exception": b64encode(dumps(exc_info(), 2)).decode(),
                 }
                 raise exception
             finally:
