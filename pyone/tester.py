@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from hashlib import md5
-from json import dump, load
+from json import dump, load, dumps as json_dumps
 from base64 import b64decode, b64encode
 from pickle import dumps, loads, HIGHEST_PROTOCOL
 from os import path, makedirs
@@ -73,7 +73,7 @@ class OneServerTester(OneServer):
         :return: file name were to store to or read from the fixture data
         '''
         signature_md5 = md5()
-        signature_md5.update(str(params).encode('utf-8'))
+        signature_md5.update(str(params).encode('utf-16'))
         signature = signature_md5.hexdigest()
 
         fixture_key = "%s_%s" % (methodname, signature)
@@ -111,14 +111,14 @@ class OneServerTester(OneServer):
                     f.close()
         else:
             try:
-                f = open(file, 'w')
+                f = open(file, 'wb')
                 ret = OneServer._do_request(self, method, params)
             except Exception as exception:
                 ret = {
-                    "exception": str(b64encode(dumps(exc_info(), HIGHEST_PROTOCOL))),
+                    "exception": b64encode(dumps(exc_info(), HIGHEST_PROTOCOL)).decode(),
                 }
                 raise exception
             finally:
-                dump(ret, f)
+                f.write(json_dumps(ret).encode())
                 f.close()
         return ret

@@ -62,7 +62,7 @@ def marketapp_export(one, appid, dsid=None, name=None, vmtemplate_name=None):
 
     if app.TYPE == MARKETPLACEAPP_TYPES.IMAGE:
         if app.APPTEMPLATE64:
-            templ=b64decode(app.APPTEMPLATE64)
+            templ=b64decode(app.APPTEMPLATE64).decode()
         else:
             templ=""
 
@@ -74,7 +74,7 @@ def marketapp_export(one, appid, dsid=None, name=None, vmtemplate_name=None):
         ret['image'] = one.image.allocate(templ,dsid)
 
         if 'VMTEMPLATE64' in app.TEMPLATE:
-            vmtempl = b64decode(app.TEMPLATE['VMTEMPLATE64'])
+            vmtempl = b64decode(app.TEMPLATE['VMTEMPLATE64']).decode()
             if not vmtemplate_name:
                 vmtemplate_name = app.NAME
 
