@@ -7,4 +7,4 @@ install:
   - make
   - python setup.py install
 # command to run tests
-script: python -m unittest discover -v -s tests/ci/
+script: python -m unittest discover -v -s tests
