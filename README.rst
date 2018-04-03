@@ -170,9 +170,11 @@ Note that a Makefile is provided to generate the python bindings
 There are two main sets of tests.
 
 - CI Tests: unit tests meant for continious integration, do not require an OpenNebula platform, run mainly on XML samples, etc.
-- Integration Tests: meant to be used with a TESTING OpenNebula platform. Will create and modify OpenNebula objects. They
-will also *record* Fixtures that can be later use in *replay* mode, so that the tests can be re-run without an actual running
-OpenNebula cloud, which is useful for detecting regressions.
+- Integration Tests: meant to be used with a TESTING OpenNebula platform. Will create and modify OpenNebula objects.
+
+IntegrationTests use a specialized XMLRPC client, OneServerTester that will also **record** Fixtures that can later be used
+in **replay** mode. In reply mode the calls to OpenNebula are intercepted and the fixtures are returned instead. This is
+useful to detect regressions but any modification to the tests cases will require to re-record Fixtures.
 
 You can run the tests as follows:
 
