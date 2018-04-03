@@ -154,7 +154,7 @@ class IntegrationTests(unittest.TestCase):
     def test_modify_template(self):
         one.set_fixture_unit_test("test_modify_template")
         host = one.host.info(self.testHostAId)
-        host.TEMPLATE["NOTES"]="Hostname is: España"
+        host.TEMPLATE["NOTES"]=u"Hostname is: España"
         one.host.update(self.testHostAId, host.TEMPLATE, 1)
         host2 = one.host.info(self.testHostAId)
         self.assertIn(host2.TEMPLATE['NOTES'], [u"Hostname is: España"])

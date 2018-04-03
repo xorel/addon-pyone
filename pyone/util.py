@@ -48,9 +48,9 @@ def cast2one(param):
                 return dicttoxml.dicttoxml(param, root=False, attr_type=False).decode('utf8')
             else:
                 # We return this dictionary as attribute=value vector
-                ret = str()
+                ret = u""
                 for (k, v) in param.items():
-                    ret = ret + k + " = " + str('"') + str(v) + str('"') + str('\n')
+                    ret = u'''%s%s="%s"\n''' % (ret, k, v)
                 return ret
         else:
             raise Exception("Cannot cast empty dictionary")

@@ -19,8 +19,9 @@ from pickle import dumps, loads
 from os import path, makedirs
 from . import OneServer
 from tblib import pickling_support
-from sys import exc_info
+from sys import exc_info, version_info
 from six import reraise
+from collections import OrderedDict
 
 pickling_support.install()
 
@@ -73,7 +74,8 @@ class OneServerTester(OneServer):
         :return: file name were to store to or read from the fixture data
         '''
         signature_md5 = md5()
-        signature_md5.update(str(params).encode('utf-16'))
+        sparms=json_dumps(params,sort_keys=True).encode()
+        signature_md5.update(sparms)
         signature = signature_md5.hexdigest()
 
         fixture_key = "%s_%s" % (methodname, signature)
@@ -122,3 +124,38 @@ class OneServerTester(OneServer):
                 f.write(json_dumps(ret).encode())
                 f.close()
         return ret
+
+    def _cast_parms(self,params):
+        """
+        Parameters will be used to generate the singnature of the method, an md5.
+        So we need signatures to be deterministics. There are two sources of randomness
+        - Python version, in particular differences in dealing with encodings
+        - Unsortered sets.
+        This method will add casting transformations to fix those, only required for testing.
+
+        :param params:
+        :return: a list of parameters that should generate a deterministic md5 signature.
+        """
+        lparams = list(params)
+
+        for i, param in enumerate(lparams):
+            if isinstance(param, dict):
+                lparams[i] = self._to_ordered_dict(param)
+
+        return  OneServer._cast_parms(self, lparams)
+
+    def _to_ordered_dict(self, param):
+        """
+        deep orders a dictionary
+        :param param:
+        :return:
+        """
+
+        if isinstance(param,dict):
+            # ensure the dictionary is ordered
+            param = OrderedDict(sorted(param.items()))
+            # recurse
+            for key, value in param.items():
+                if isinstance(value, dict):
+                    param[key] = self._to_ordered_dict(value)
+        return param
