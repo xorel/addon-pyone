@@ -20,6 +20,5 @@ class AttributeVectorTests(unittest.TestCase):
         atts = {
             'NAME': 'abc',
             'MEMORY': '1024',
-            'ATT1': 'value1'
             }
-        self.assertIn(pyone.util.cast2one(atts), ['''NAME = "abc"\nATT1 = "value1"\nMEMORY = "1024"\n''', '''NAME = "abc"\nMEMORY = "1024"\nATT1 = "value1"\n'''])
+        self.assertIn(pyone.util.cast2one(atts), ['''NAME="abc"\nMEMORY="1024"\n''', '''MEMORY="1024"\nNAME="abc"\n'''])
