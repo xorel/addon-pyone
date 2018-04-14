@@ -1,10 +1,104 @@
-language: python
-python:
-  - "2.7"
-  - "3.6"
+os: linux
+dist: trusty
+sudo: required
+language: generic
+services: docker
+
+matrix:
+    include:
+      - env: VARIANT='centos' VERSION='7' PYTHON='2'
+      - env: VARIANT='centos' VERSION='7' PYTHON='3'
+      - env: VARIANT='debian' VERSION='latest' PYTHON='2'
+      - env: VARIANT='debian' VERSION='latest' PYTHON='3'
+      - env: VARIANT='fedora' VERSION='latest' PYTHON='2'
+      - env: VARIANT='fedora' VERSION='latest' PYTHON='3'
+      - env: VARIANT='ubuntu' VERSION='latest' PYTHON='2'
+      - env: VARIANT='ubuntu' VERSION='latest' PYTHON='3'
+      - env: VARIANT='ubuntu' VERSION='devel' PYTHON='2'
+      - env: VARIANT='ubuntu' VERSION='devel' PYTHON='3'
+      - env: VARIANT='ubuntu' VERSION='rolling' PYTHON='3'
+
+before_install:
+  - export CONTAINER="${VARIANT}_${VERSION}_python${PYTHON}"
+  - docker pull "${VARIANT}:${VERSION}"
+  - docker run -dit --name "${CONTAINER}" -v "$TRAVIS_BUILD_DIR":/src "${VARIANT}:${VERSION}" sh
+  - if [ "${VARIANT}" == "centos" ]; then
+      if [ "${VERSION}" == "7" ]; then
+         docker exec -i "${CONTAINER}" yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm;
+      fi;
+      if [ "${PYTHON}" == "2" ]; then
+         docker exec -i "${CONTAINER}" yum -y install python${PYTHON}-pip;
+         docker exec -i "${CONTAINER}" yum -y install python-virtualenv;
+      else
+         docker exec -i "${CONTAINER}" yum -y install python34-pip;
+         docker exec -i "${CONTAINER}" yum -y install python34-virtualenv python-virtualenv;
+      fi;
+      docker exec -i "${CONTAINER}" yum -y install which;
+      docker exec -i "${CONTAINER}" yum -y install gcc;
+      docker exec -i "${CONTAINER}" yum -y install libxml2-devel;
+      docker exec -i "${CONTAINER}" yum -y install libxslt-devel;
+      docker exec -i "${CONTAINER}" yum -y install make;
+      docker exec -i "${CONTAINER}" pip${PYTHON} install --upgrade pip virtualenv;
+    fi
+  - if [ "${VARIANT}" == "debian" ]; then
+      docker exec -i "${CONTAINER}" apt-get update;
+      if [ "${PYTHON}" == "2" ]; then
+        docker exec -i "${CONTAINER}" apt-get -y install python-pip;
+        docker exec -i "${CONTAINER}" apt-get -y install python-virtualenv;
+      else
+        docker exec -i "${CONTAINER}" apt-get -y install python${PYTHON}-pip;
+        docker exec -i "${CONTAINER}" apt-get -y install python${PYTHON}-virtualenv virtualenv;
+      fi
+    fi
+  - if [ "${VARIANT}" == "fedora" ]; then
+      docker exec -i "${CONTAINER}" yum -y install python${PYTHON}-pip;
+      docker exec -i "${CONTAINER}" yum -y install python${PYTHON}-virtualenv python-virtualenv;
+      docker exec -i "${CONTAINER}" yum -y install which;
+      docker exec -i "${CONTAINER}" yum -y install gcc;
+      docker exec -i "${CONTAINER}" yum -y install libxml2-devel;
+      docker exec -i "${CONTAINER}" yum -y install make;
+    fi
+  - if [ "${VARIANT}" == "ubuntu" ]; then
+      docker exec -i "${CONTAINER}" apt-get update;
+      if [ "${PYTHON}" == "2" ]; then
+        docker exec -i "${CONTAINER}" apt-get -y install python-pip;
+        docker exec -i "${CONTAINER}" apt-get -y install python-virtualenv;
+      else
+        docker exec -i "${CONTAINER}" apt-get -y install python${PYTHON}-pip;
+        docker exec -i "${CONTAINER}" apt-get -y install python${PYTHON}-virtualenv virtualenv;
+      fi
+    fi
+  - docker exec -i "${CONTAINER}" which pip${PYTHON}
+  - docker exec -i "${CONTAINER}" pip${PYTHON} --version
+
+# install test environment
 install:
-  - pip install -r requirements.txt 
-  - make
-  - python setup.py install
-# command to run tests
-script: python -m unittest discover -v -s tests
+  - >-
+    docker exec -i "${CONTAINER}"
+    bash -c "cd /src&&
+    virtualenv --python=python${PYTHON} VENV_TEST&&
+    . VENV_TEST/bin/activate&&
+    pip install --upgrade setuptools&&
+    pip install -r requirements.txt&&
+    make&&
+    python setup.py install"
+
+# test
+script:
+  - >-
+    docker exec -i "${CONTAINER}"
+    bash -c ". /src/VENV_TEST/bin/activate&&
+    python -m unittest discover -v -s /src/tests/ci"
+
+# install from sdist
+after_success:
+  - >-
+    docker exec -i "${CONTAINER}"
+    bash -c "cd /src&&
+    virtualenv --python=python${PYTHON} VENV_INSTALL&&
+    . VENV_INSTALL/bin/activate&&
+    pip install --upgrade setuptools&&
+    python setup.py sdist&&
+    cd /&&
+    pip install /src/dist/*.tar.gz&&
+    python -c 'import pyone; print(pyone.__file__)'"
