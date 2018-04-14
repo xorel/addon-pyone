@@ -7,7 +7,7 @@ services: docker
 matrix:
     include:
       - env: VARIANT='centos' VERSION='7' PYTHON='2'
-      - env: VARIANT='centos' VERSION='7' PYTHON='3'
+      #- env: VARIANT='centos' VERSION='7' PYTHON='3'
       - env: VARIANT='debian' VERSION='latest' PYTHON='2'
       - env: VARIANT='debian' VERSION='latest' PYTHON='3'
       - env: VARIANT='fedora' VERSION='latest' PYTHON='2'
