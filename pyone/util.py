@@ -17,7 +17,7 @@ import dicttoxml
 import xmltodict
 from lxml.etree import tostring
 from collections import OrderedDict
-from enum import IntEnum
+from aenum import IntEnum
 
 
 def cast2one(param):

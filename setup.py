@@ -58,7 +58,7 @@ setup(
         'xmltodict',
         'six',
         "future ; python_version<'3.0'",
-        "enum34 ; python_version<'3.5'"
+        'aenum'
     ],
     package_data={
         'pyone': ['xsd/*.xsd'],

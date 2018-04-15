@@ -17,7 +17,7 @@
 # this tests help stablishing if they are working in previous versions too.
 
 from unittest import TestCase
-from enum import IntEnum
+from aenum import IntEnum
 from pyone import MARKETPLACEAPP_STATES, LCM_STATE
 
 class ConstantTest(TestCase):

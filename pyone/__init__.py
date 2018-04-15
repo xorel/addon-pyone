@@ -42,7 +42,7 @@ class OneInternalException(OneException):
 # Constants, naming follows those in Open Nebula Ruby API
 #
 
-from enum import IntEnum
+from aenum import IntEnum
 
 DATASTORE_TYPES = IntEnum('DATASTORE_TYPES','IMAGE SYSTEM FILE',start=0)
 DATASTORE_STATES = IntEnum('DATASTORE_STATES','READY DISABLED',start=0)
