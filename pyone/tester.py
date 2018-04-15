@@ -102,7 +102,7 @@ class OneServerTester(OneServer):
 
         if self._fixture_replay:
             try:
-                f = open(file, 'rb')
+                f = open(file, 'r')
                 ret = load(f)
                 if 'exception' in ret:
                     reraise(*loads(b64decode(ret['exception'])))
