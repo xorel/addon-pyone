@@ -86,9 +86,15 @@ install:
 # test
 script:
   - >-
-    docker exec -i "${CONTAINER}"
-    bash -c ". /src/VENV_TEST/bin/activate&&
-    python -m unittest discover -v -s /src/tests"
+    if [ "${VARIANT}" == "centos" ]; then
+      docker exec -i "${CONTAINER}"
+      bash -c ". /src/VENV_TEST/bin/activate&&
+      PYTHONHTTPSVERIFY=0 python -m unittest discover -v -s /src/tests"
+    else
+      docker exec -i "${CONTAINER}"
+      bash -c ". /src/VENV_TEST/bin/activate&&
+      python -m unittest discover -v -s /src/tests"
+    fi
 
 # install from sdist
 after_success:
