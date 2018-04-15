@@ -88,7 +88,7 @@ script:
   - >-
     docker exec -i "${CONTAINER}"
     bash -c ". /src/VENV_TEST/bin/activate&&
-    python -m unittest discover -v -s tests
+    python -m unittest discover -v -s /src/tests
 
 # install from sdist
 after_success:
