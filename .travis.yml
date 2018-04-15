@@ -7,7 +7,7 @@ services: docker
 matrix:
     include:
       - env: VARIANT='centos' VERSION='7' PYTHON='2'
-      #- env: VARIANT='centos' VERSION='7' PYTHON='3'
+      - env: VARIANT='centos' VERSION='7' PYTHON='3'
       - env: VARIANT='debian' VERSION='latest' PYTHON='2'
       - env: VARIANT='debian' VERSION='latest' PYTHON='3'
       - env: VARIANT='fedora' VERSION='latest' PYTHON='2'
@@ -88,7 +88,7 @@ script:
   - >-
     docker exec -i "${CONTAINER}"
     bash -c ". /src/VENV_TEST/bin/activate&&
-    python -m unittest discover -v -s /src/tests/ci"
+    python -m unittest discover -v -s tests
 
 # install from sdist
 after_success:
