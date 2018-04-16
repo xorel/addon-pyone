@@ -35,9 +35,9 @@ Authors
 
 * Rafael del Valle (rvalle@privaz.io)
 
-** Credits **
+**Credits**
 
-Pyone was inspired by `Python-oca <https://github.com/python-oca/python-oca>`_. 
+Pyone was inspired by `Python-oca <https://github.com/python-oca/python-oca>`_.
 
 Compatibility
 -------------
