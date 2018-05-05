@@ -13,107 +13,112 @@
 # limitations under the License.
 
 from hashlib import md5
-from json import dump, load, dumps as json_dumps
+from json import load, dumps as json_dumps
 from base64 import b64decode, b64encode
 from pickle import dumps, loads
-from os import path, makedirs
+from os import path
 from . import OneServer
 from tblib import pickling_support
-from sys import exc_info, version_info
+from sys import exc_info
 from six import reraise
 from collections import OrderedDict
+from gzip import open
 
 pickling_support.install()
 
 class OneServerTester(OneServer):
     '''
     This class extends the OneServer to facilitate unit testing
-    The idea is to be able to "record" fixitures while testing with a live OpenNebula platform.
+    The idea is to be able to "record" fixtures while testing with a live OpenNebula platform.
     Those recordings can later be use in "replay" mode to simulate an OpenNebula platform.
     XMLAPI method calls are recorded as test_base/unit_test/method_signature_instance
     The signature is generated as the md5 of the parameters
     if several calls with the same signature are doing during the same unit test, instance is incremented.
     The order in which calls happen within the same unit_test must be deterministic.
     '''
-    def __init__(self, uri, session, fixture_path, timeout=None, fixture_replay=False, **options):
-        if not path.exists(fixture_path):
-            makedirs(fixture_path)
+    def __init__(self, uri, session, fixture_file, timeout=None, fixture_replay=False, **options):
+        if path.isfile(fixture_file):
+            f = open(fixture_file,"r")
+            self._fixtures=load(f)
+            f.close()
+        else:
+            self._fixtures = dict()
 
         # all members involved in the fixtures must be predefined or
         # the magic getter method will trigger resulting in stack overflows
-        self._fixture_keys = dict()
-        self._fixture_test_path = fixture_path
-        self._fixture_path = fixture_path
         self._fixture_replay = fixture_replay
-        self._fixture_unit_test = "init"
+        self._fixture_file = fixture_file
+        self.set_fixture_unit_test('init')
 
         OneServer.__init__(self, uri, session, timeout, **options)
 
     def set_fixture_unit_test(self,name):
         """
-        Set the name of the unit test. this will create a new fixture directory
-        It will create the directory if it does not exists
-        Will reset the fixture key counter
+        Set the name of the unit test. creates an entry in the fixture tree if it does not exist.
         :param name:
         :return:
         """
 
-        self._fixture_unit_test = name
-        self._fixture_test_path = path.join(self._fixture_path, name)
-        self._fixture_keys = dict()
+        if not name in self._fixtures:
+            self._fixtures[name] = dict()
 
-        if not path.exists(self._fixture_test_path):
-            makedirs(self._fixture_test_path)
+        self._fixture_unit_test = self._fixtures[name]
 
-    def _get_fixture_file(self,methodname, params):
+    def _fixture_signature(self, methodname, params):
+        signature_md5 = md5()
+        sparms=json_dumps(params,sort_keys=True).encode()
+        signature_md5.update(sparms)
+        return signature_md5.hexdigest()
+
+    def _get_fixture(self,methodname, params):
         '''
-        returns the fixture file, in its directory.
-        increases the instance number each time the same key is requested.
+        returns the next fixture for a given call.
         :param methodname: XMlRPC method
         :param params: the paramters passed
         :return: file name were to store to or read from the fixture data
         '''
-        signature_md5 = md5()
-        sparms=json_dumps(params,sort_keys=True).encode()
-        signature_md5.update(sparms)
-        signature = signature_md5.hexdigest()
 
-        fixture_key = "%s_%s" % (methodname, signature)
+        ret = self._fixture_unit_test[methodname][self._fixture_signature(methodname,params)].pop(0)
 
-        if fixture_key in self._fixture_keys:
-            instance = self._fixture_keys[fixture_key] + 1
-        else:
-            instance = 0
+        if not ret:
+            raise Exception("Could not read fixture, if the tests changed you must re-record fixtures")
 
-        self._fixture_keys[fixture_key]= instance
+        return ret
 
-        return path.join(self._fixture_test_path, "%s_%d.json" % (fixture_key, instance))
+    def _set_fixture(self,methodname,params,object):
+        '''
+        Will create the fixture for a given call
+        :param methodname:
+        :param params:
+        :return:
+        '''
+
+        signature = self._fixture_signature(methodname,params)
+
+        if not methodname in self._fixture_unit_test:
+            self._fixture_unit_test[methodname]=dict()
+
+        if not signature in self._fixture_unit_test[methodname]:
+            self._fixture_unit_test[methodname][signature]=[]
+
+        self._fixture_unit_test[methodname][signature].append(object)
 
     def _do_request(self,method,params):
         '''
         Intercepts requests.
         In record mode they are recorded before being returned.
         In replay mode they are read from fixtures instead
+        Exceptions are also captured and reraised
         '''
 
-        file = self._get_fixture_file(method, params)
         ret = None
-        f = None
 
         if self._fixture_replay:
-            try:
-                f = open(file, 'r')
-                ret = load(f)
-                if 'exception' in ret:
-                    reraise(*loads(b64decode(ret['exception'])))
-            except IOError:
-                raise Exception("Could not read fixture file, if any parameter changed you must re-record fixtures")
-            finally:
-                if f:
-                    f.close()
+            ret = self._get_fixture(method,params)
+            if 'exception' in ret:
+                reraise(*loads(b64decode(ret['exception'])))
         else:
             try:
-                f = open(file, 'wb')
                 ret = OneServer._do_request(self, method, params)
             except Exception as exception:
                 ret = {
@@ -121,16 +126,15 @@ class OneServerTester(OneServer):
                 }
                 raise exception
             finally:
-                f.write(json_dumps(ret).encode())
-                f.close()
+                self._set_fixture(method,params,ret)
         return ret
 
     def _cast_parms(self,params):
         """
-        Parameters will be used to generate the singnature of the method, an md5.
-        So we need signatures to be deterministics. There are two sources of randomness
+        Parameters will be used to generate the signature of the method, an md5.
+        So we need signatures to be deterministic. There are two sources of randomness
         - Python version, in particular differences in dealing with encodings
-        - Unsortered sets.
+        - Unsorted sets.
         This method will add casting transformations to fix those, only required for testing.
 
         :param params:
@@ -159,3 +163,13 @@ class OneServerTester(OneServer):
                 if isinstance(value, dict):
                     param[key] = self._to_ordered_dict(value)
         return param
+
+    def _close_fixtures(self):
+        """
+        Unpdates the fixture data if we are recording.
+        :return:
+        """
+        if not self._fixture_replay:
+            f = open(self._fixture_file,"wb")
+            f.write(json_dumps(self._fixtures).encode())
+            f.close()

@@ -31,34 +31,41 @@ fixture_replay = True
 
 # Capture OpenNebula Session parameters from environment or hardcoded...
 test_session = os.getenv("PYONE_SESSION", "oneadmin:onepass")
-test_endpoint = os.getenv("PYONE_ENDPOINT", 'https://192.168.121.55/RPC2')
+test_endpoint = os.getenv("PYONE_ENDPOINT", 'https://192.168.121.78/RPC2')
 
 # Testing mode: replay or record fixtures, and fixture path
 
-fixture_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+fixture_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'integration.json.gz')
 
 # Disable SSL checks for TEST environment only, and deal with Centos, see issue #13
 if "PYTHONHTTPSVERIFY" in os.environ:
-    one = OneServer(test_endpoint, fixture_path=fixture_path, fixture_replay=fixture_replay, session=test_session)
+    one = OneServer(test_endpoint, fixture_file=fixture_file, fixture_replay=fixture_replay, session=test_session)
 else:
-    one = OneServer(test_endpoint, fixture_path=fixture_path, fixture_replay=fixture_replay, session=test_session, context=ssl._create_unverified_context())
+    one = OneServer(test_endpoint, fixture_file=fixture_file, fixture_replay=fixture_replay, session=test_session, context=ssl._create_unverified_context())
 
+# Test Objects
+testHostAId = None
+testHostBId = None
+testVMAid = None
 
 class IntegrationTests(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         """
         Will define test resources from the pool
         anyone should do
         :return:
         """
-        if not hasattr(self, 'testHostAId'):
-            one.set_fixture_unit_test("setup")
-            hosts = one.hostpool.info()
-            self.testHostAId = hosts.HOST[0].ID
-            self.testHostBId = hosts.HOST[1].ID
-            vms = one.vmpool.info(-2, -1, -1, -1)
-            self.testVMAid = vms.VM[0].ID
+
+        global testHostAId, testHostBId, testVMAid
+
+        one.set_fixture_unit_test("setup")
+        hosts = one.hostpool.info()
+        testHostAId = hosts.HOST[0].ID
+        testHostBId = hosts.HOST[1].ID
+        vms = one.vmpool.info(-2, -1, -1, -1)
+        testVMAid = vms.VM[0].ID
 
     def test_pool_info(self):
         one.set_fixture_unit_test("test_pool_info")
@@ -66,16 +73,6 @@ class IntegrationTests(unittest.TestCase):
         self.assertGreater(len(hostpool.HOST), 0)
         host = hostpool.HOST[0]
         self.assertIn(HOST_STATES(host.STATE), [HOST_STATES.MONITORED, HOST_STATES.INIT])
-
-    def test_auth_error(self):
-        with self.assertRaises(OneAuthenticationException):
-            one.set_fixture_unit_test("test_auth_error")
-            # Disable SSL checks for TEST environment only, and deal with Centos, see issue #13
-            if "PYTHONHTTPSVERIFY" in os.environ:
-                xone = OneServer(test_endpoint, fixture_path=fixture_path, fixture_replay=fixture_replay, session="oneadmin:invalidpass")
-            else:
-                xone = OneServer(test_endpoint, fixture_path=fixture_path, fixture_replay=fixture_replay, session="oneadmin:invalidpass", context=ssl._create_unverified_context())
-            xone.hostpool.info()
 
     def test_market_info(self):
         one.set_fixture_unit_test("test_market_info")
@@ -97,75 +94,75 @@ class IntegrationTests(unittest.TestCase):
 
     def test_template_attribute_vector_parameter(self):
         one.set_fixture_unit_test("test_template_attribute_vector_parameter")
-        one.host.update(self.testHostAId,  {"LABELS": "HD,LOWPOWER"}, 1)
-        host = one.host.info(self.testHostAId)
+        one.host.update(testHostAId,  {"LABELS": "HD,LOWPOWER"}, 1)
+        host = one.host.info(testHostAId)
         self.assertEqual(host.TEMPLATE['LABELS'], u"HD,LOWPOWER")
 
     def test_xml_template_parameter(self):
         one.set_fixture_unit_test("test_xml_template_parameter")
-        one.host.update(self.testHostBId,
+        one.host.update(testHostBId,
             {
                 'TEMPLATE': {
                     'LABELS': 'SSD',
                     'MAX_CPU': '176'
                 }
             }, 1)
-        host = one.host.info(self.testHostBId)
+        host = one.host.info(testHostBId)
         self.assertEqual(host.TEMPLATE['LABELS'], u"SSD")
         self.assertEqual(host.TEMPLATE['MAX_CPU'], u"176")
 
     def test_empty_dictionary(self):
         with self.assertRaises(Exception):
             one.set_fixture_unit_test("test_empty_dictionary")
-            one.host.update(self.testHostAId, {}, 1)
+            one.host.update(testHostAId, {}, 1)
 
     def test_retrieve_template_as_DOM_no_longer_working(self):
         with self.assertRaises(AttributeError):
             one.set_fixture_unit_test("test_retrieve_template_as_DOM_no_longer_working")
-            host = one.host.info(self.testHostAId)
+            host = one.host.info(testHostAId)
             template = host.TEMPLATE.toDOM()
             arch = template.getElementsByTagName('ARCH')[0].firstChild.nodeValue
             self.assertEqual(arch, 'x86_64')
 
     def test_retrieve_template_as_deprecated_dict(self):
         one.set_fixture_unit_test("test_retrieve_template_as_deprecated_dict")
-        host = one.host.info(self.testHostAId)
+        host = one.host.info(testHostAId)
         tdict = one2dict(host.TEMPLATE)
         arch = tdict['TEMPLATE']['ARCH']
         self.assertEqual(arch, 'x86_64')
 
     def test_retrieve_template_as_new_dict(self):
         one.set_fixture_unit_test("test_retrieve_template_as_new_dict")
-        host = one.host.info(self.testHostAId)
+        host = one.host.info(testHostAId)
         arch = host.TEMPLATE['ARCH']
         self.assertEqual(arch, 'x86_64')
 
     def test_international_characters_issue_006(self):
         one.set_fixture_unit_test("test_international_characters_issue_006")
-        one.host.update(self.testHostAId,
+        one.host.update(testHostAId,
             {
                 'TEMPLATE': {
                     'NOTES': 'Hostname is: ESPAÑA',
                 }
             }, 1)
-        host = one.host.info(self.testHostAId)
+        host = one.host.info(testHostAId)
         self.assertIn(host.TEMPLATE['NOTES'], [u"Hostname is: ESPAÑA"])
 
     def test_modify_template(self):
         one.set_fixture_unit_test("test_modify_template")
-        host = one.host.info(self.testHostAId)
+        host = one.host.info(testHostAId)
         host.TEMPLATE["NOTES"]=u"Hostname is: España"
-        one.host.update(self.testHostAId, host.TEMPLATE, 1)
-        host2 = one.host.info(self.testHostAId)
+        one.host.update(testHostAId, host.TEMPLATE, 1)
+        host2 = one.host.info(testHostAId)
         self.assertIn(host2.TEMPLATE['NOTES'], [u"Hostname is: España"])
 
 
     def test_vm_info(self):
         one.set_fixture_unit_test("test_vm_info")
-        vm = one.vm.info(self.testVMAid)
+        vm = one.vm.info(testVMAid)
         labels = vm.USER_TEMPLATE.get('LABELS', "")
         culsterId = vm.TEMPLATE['DISK']['CLUSTER_ID']
-        self.assertEqual(vm.ID,self.testVMAid)
+        self.assertEqual(vm.ID,testVMAid)
 
     def test_market_info(self):
         one.set_fixture_unit_test("test_market_info")
@@ -189,4 +186,25 @@ class IntegrationTests(unittest.TestCase):
 
     def test_marshalling_enums(self):
         one.set_fixture_unit_test("test_marshalling_enums")
-        self.assertTrue(one.host.status(self.testHostAId, HOST_STATUS.ENABLED))
+        self.assertTrue(one.host.status(testHostAId, HOST_STATUS.ENABLED))
+
+    @classmethod
+    def tearDownClass(cls):
+        one._close_fixtures()
+
+
+class AuthenticationTest(unittest.TestCase):
+    def test_auth_error(self):
+        with self.assertRaises(OneAuthenticationException):
+            afixture_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'auth.json.gz')
+            # Disable SSL checks for TEST environment only, and deal with Centos, see issue #13
+            if "PYTHONHTTPSVERIFY" in os.environ:
+                xone = OneServer(test_endpoint, fixture_file=afixture_file, fixture_replay=fixture_replay, session="oneadmin:invalidpass")
+            else:
+                xone = OneServer(test_endpoint, fixture_file=afixture_file, fixture_replay=fixture_replay, session="oneadmin:invalidpass", context=ssl._create_unverified_context())
+
+            xone.set_fixture_unit_test("test_auth_error")
+            try:
+                xone.hostpool.info()
+            finally:
+                xone._close_fixtures()
