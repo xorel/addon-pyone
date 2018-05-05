@@ -26,7 +26,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='pyone',
-    version='1.1.5',
+    version='1.1.6',
     description='Python Bindings for OpenNebula XML-RPC API',
     long_description=long_description,
 
@@ -58,7 +58,8 @@ setup(
         'xmltodict',
         'six',
         "future ; python_version<'3.0'",
-        'aenum'
+        'aenum',
+        'tblib'
     ],
     package_data={
         'pyone': ['xsd/*.xsd'],
