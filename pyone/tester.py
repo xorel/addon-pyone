@@ -28,7 +28,7 @@ pickling_support.install()
 
 
 def read_fixture_file(fixture_file):
-    f = open(fixture_file, "r")
+    f = open(fixture_file, "rt")
     ret = load(f)
     f.close()
     return ret
