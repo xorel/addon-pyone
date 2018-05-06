@@ -26,6 +26,20 @@ from gzip import open
 
 pickling_support.install()
 
+
+def read_fixture_file(fixture_file):
+    f = open(fixture_file, "r")
+    ret = load(f)
+    f.close()
+    return ret
+
+
+def write_fixture_file(fixture_file, obj):
+    f = open(fixture_file, "wb")
+    f.write(json_dumps(obj).encode())
+    f.close()
+
+
 class OneServerTester(OneServer):
     '''
     This class extends the OneServer to facilitate unit testing
@@ -38,9 +52,7 @@ class OneServerTester(OneServer):
     '''
     def __init__(self, uri, session, fixture_file, timeout=None, fixture_replay=False, **options):
         if path.isfile(fixture_file):
-            f = open(fixture_file,"r")
-            self._fixtures=load(f)
-            f.close()
+            self._fixtures = read_fixture_file(fixture_file)
         else:
             self._fixtures = dict()
 
@@ -70,7 +82,7 @@ class OneServerTester(OneServer):
         signature_md5.update(sparms)
         return signature_md5.hexdigest()
 
-    def _get_fixture(self,methodname, params):
+    def _get_fixture(self, methodname, params):
         '''
         returns the next fixture for a given call.
         :param methodname: XMlRPC method
@@ -170,6 +182,4 @@ class OneServerTester(OneServer):
         :return:
         """
         if not self._fixture_replay:
-            f = open(self._fixture_file,"wb")
-            f.write(json_dumps(self._fixtures).encode())
-            f.close()
+            write_fixture_file(self._fixture_file, self._fixtures)
