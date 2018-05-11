@@ -3,6 +3,9 @@ PyONE: Open Nebula Python Bindings
 
 .. image:: https://travis-ci.org/OpenNebula/addon-pyone.svg?branch=master
     :target: https://travis-ci.org/OpenNebula/addon-pyone
+.. image:: https://badges.gitter.im/addon-pyone-and-opennebula-ansible/Lobby.svg
+    :alt: Join the chat at https://gitter.im/addon-pyone-and-opennebula-ansible/Lobby
+    :target: https://gitter.im/addon-pyone-and-opennebula-ansible/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 Description
 -----------
