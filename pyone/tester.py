@@ -40,12 +40,6 @@ def write_fixture_file(fixture_file, obj):
     f.write(json_dumps(obj).encode())
     f.close()
 
-# Environment driven initialization required for capturing fixtures during ansible integration tests
-
-_test_fixture_file = environ.get("PYONE_TEST_FIXTURE_FILE", None)
-_test_fixture_replay = (environ.get("PYONE_TEST_FIXTURE_REPLAY", "True").lower() in ["1", "yes", "true"])
-_test_fixture_unit = environ.get("PYONE_TEST_FIXTURE_UNIT", "init")
-
 class OneServerTester(OneServer):
     '''
     This class extends the OneServer to facilitate unit testing
@@ -56,7 +50,19 @@ class OneServerTester(OneServer):
     if several calls with the same signature are doing during the same unit test, instance is incremented.
     The order in which calls happen within the same unit_test must be deterministic.
     '''
-    def __init__(self, uri, session, fixture_file=_test_fixture_file, fixture_unit='init', timeout=None, fixture_replay=_test_fixture_replay, **options):
+    def __init__(self, uri, session, fixture_file=None, fixture_unit=None, timeout=None, fixture_replay=None, **options):
+
+        # Environment driven initialization required for capturing fixtures during ansible integration tests
+
+        if fixture_file is None:
+            fixture_file = environ.get("PYONE_TEST_FIXTURE_FILE", None)
+
+        if fixture_replay is None:
+            fixture_replay = (environ.get("PYONE_TEST_FIXTURE_REPLAY", "True").lower() in ["1", "yes", "true"])
+
+        if fixture_unit is None:
+            fixture_unit = environ.get("PYONE_TEST_FIXTURE_UNIT", "init")
+
         if path.isfile(fixture_file):
             self._fixtures = read_fixture_file(fixture_file)
         else:
