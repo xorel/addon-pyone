@@ -182,7 +182,10 @@ class OneServerTester(OneServer):
                     param[key] = self._to_ordered_dict(value)
         return param
 
-    def _close_fixtures(self):
+    def server_retry_inverfal(self):
+        return 0.01
+
+    def server_close(self):
         """
         Unpdates the fixture data if we are recording.
         :return:

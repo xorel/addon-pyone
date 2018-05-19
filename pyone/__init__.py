@@ -242,7 +242,13 @@ class OneServer(xmlrpc.client.ServerProxy):
             else:
                 raise OneException(message)
 
-    #def marketapp.export(self):
+    def server_retry_inverfal(self):
+        '''returns the recommended wait time between attempts to check if the opennebula platform has
+        reached a desired state, in seconds'''
+        return 1
+
+    def server_close(self):
+        pass
 
 
 

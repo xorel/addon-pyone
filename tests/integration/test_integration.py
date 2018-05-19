@@ -186,7 +186,7 @@ class IntegrationTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        one._close_fixtures()
+        one.server_close()
 
 
 class AuthenticationTest(unittest.TestCase):
@@ -203,4 +203,4 @@ class AuthenticationTest(unittest.TestCase):
             try:
                 xone.hostpool.info()
             finally:
-                xone._close_fixtures()
+                xone.server_close()
