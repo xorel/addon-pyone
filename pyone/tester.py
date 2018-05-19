@@ -188,7 +188,7 @@ class OneServerTester(OneServer):
                     param[key] = self._to_ordered_dict(value)
         return param
 
-    def server_retry_inverfal(self):
+    def server_retry_interval(self):
         return 0.01
 
     def server_close(self):
