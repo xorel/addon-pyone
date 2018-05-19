@@ -19,29 +19,25 @@ import ssl
 import os
 from pyone import HOST_STATES, HOST_STATUS, OneException, OneAuthenticationException
 
+os.environ["PYONE_TEST_FIXTURE"]="yes"
+os.environ["PYONE_TEST_FIXTURE_FILE"]=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'integration.json.gz')
+os.environ["PYONE_TEST_FIXTURE_REPLAY"]="yes"
+
 # Note that we import a TesterServer that has extends with record/replay fixtures
-from pyone.tester import OneServerTester as OneServer
+from pyone.server import OneServer
 
 # Deprecated utility, testing backward compatibility
 from pyone.util import one2dict
-
-# Select whether to record or replay fixtures
-
-fixture_replay = True
 
 # Capture OpenNebula Session parameters from environment or hardcoded...
 test_session = os.getenv("PYONE_SESSION", "oneadmin:onepass")
 test_endpoint = os.getenv("PYONE_ENDPOINT", 'https://192.168.121.78/RPC2')
 
-# Testing mode: replay or record fixtures, and fixture path
-
-fixture_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'integration.json.gz')
-
 # Disable SSL checks for TEST environment only, and deal with Centos, see issue #13
 if "PYTHONHTTPSVERIFY" in os.environ:
-    one = OneServer(test_endpoint, fixture_file=fixture_file, fixture_replay=fixture_replay, session=test_session)
+    one = OneServer(test_endpoint, session=test_session)
 else:
-    one = OneServer(test_endpoint, fixture_file=fixture_file, fixture_replay=fixture_replay, session=test_session, context=ssl._create_unverified_context())
+    one = OneServer(test_endpoint, session=test_session, context=ssl._create_unverified_context())
 
 # Test Objects
 testHostAId = None
@@ -199,9 +195,9 @@ class AuthenticationTest(unittest.TestCase):
             afixture_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'auth.json.gz')
             # Disable SSL checks for TEST environment only, and deal with Centos, see issue #13
             if "PYTHONHTTPSVERIFY" in os.environ:
-                xone = OneServer(test_endpoint, fixture_file=afixture_file, fixture_replay=fixture_replay, session="oneadmin:invalidpass")
+                xone = OneServer(test_endpoint, fixture_file=afixture_file, session="oneadmin:invalidpass")
             else:
-                xone = OneServer(test_endpoint, fixture_file=afixture_file, fixture_replay=fixture_replay, session="oneadmin:invalidpass", context=ssl._create_unverified_context())
+                xone = OneServer(test_endpoint, fixture_file=afixture_file, session="oneadmin:invalidpass", context=ssl._create_unverified_context())
 
             xone.set_fixture_unit_test("test_auth_error")
             try:
