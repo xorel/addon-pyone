@@ -45,7 +45,8 @@ def cast2one(param):
             root = list(param.values())[0]
             if isinstance(root, dict):
                 # We return this dictionary as XML
-                return dicttoxml.dicttoxml(param, root=False, attr_type=False).decode('utf8')
+                return dicttoxml.dicttoxml(param, root=False,attr_type=False,
+                                           cdata=True).decode('utf8')
             else:
                 # We return this dictionary as attribute=value vector
                 ret = u""
@@ -71,6 +72,14 @@ def one2dict(element):
     return element._root
 
 
+def none2emptystr(d):
+    for k,v in d.items():
+        if type(v) == OrderedDict:
+            none2emptystr(v)
+        elif v == None:
+            d[k] = ""
+
+
 def child2dict(element):
     '''
     Creates a dictionary from the documentTree obtained from a binding Element.
@@ -91,6 +100,9 @@ def child2dict(element):
     # Reemplace no-dictionary with empty dictionary
     if ret[tagName] == None:
         ret[tagName] = OrderedDict()
+
+    # Replace 'None' values returned by xmltodict by ""
+    none2emptystr(ret)
 
     # return the contents dictionary, but save a reference
     ret[tagName]._root = ret
